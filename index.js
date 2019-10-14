@@ -68,6 +68,14 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
+  const names = persons.map(person => person.name)
+  console.log(names);
+  if (names.indexOf(body.name) !== -1){
+    return res.status(400).json({
+      error: 'Name must be unique'
+    })
+  }
+
   const person = {
     name: body.name,
     number: body.number,
