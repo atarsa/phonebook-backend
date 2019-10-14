@@ -1,9 +1,15 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 const bodyParser = require('body-parser')
 
+morgan.token('body', function (req, res) {
+  return JSON.stringify(req.body)
+})
+
 app.use(bodyParser.json())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 let persons = [
   
@@ -69,7 +75,7 @@ app.post('/api/persons', (req, res) => {
   }
 
   const names = persons.map(person => person.name)
-  console.log(names);
+  
   if (names.indexOf(body.name) !== -1){
     return res.status(400).json({
       error: 'Name must be unique'
@@ -99,7 +105,11 @@ app.get('/info', (req,res) => {
 })
 
 
+const unknownEndpoint = (req,res) => {
+  res.status(404).send({error: 'unknown endpoint'})
+}
 
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {
