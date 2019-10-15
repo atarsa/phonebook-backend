@@ -10,6 +10,7 @@ morgan.token('body', function (req, res) {
 
 app.use(bodyParser.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+app.use(express.static('build'))
 
 let persons = [
   
@@ -111,7 +112,7 @@ const unknownEndpoint = (req,res) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

@@ -6,8 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:ui": "rm -rf build && cd ../../FullStack_Open/part2/phonebook && npm run build --prod && cp -r build ../../../FullStack_Open_part3/phonebook_backend"
   },
+
   "author": "",
   "license": "ISC",
   "dependencies": {
