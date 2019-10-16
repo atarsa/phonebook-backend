@@ -1,12 +1,15 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
-const app = express()
+const Person = require('./models/person')
 
-const bodyParser = require('body-parser')
 
 morgan.token('body', function (req, res) {
   return JSON.stringify(req.body)
 })
+
+const app = express()
+const bodyParser = require('body-parser')
 
 app.use(bodyParser.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -39,8 +42,12 @@ let persons = [
 const generateId = () => Math.floor(Math.random() * Math.floor(10000))
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
-})
+  Person
+    .find({})
+    .then((persons => {
+      res.json(persons.map(person => person.toJSON()))
+    }));  
+});
 
 app.get('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id)
@@ -112,7 +119,7 @@ const unknownEndpoint = (req,res) => {
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
