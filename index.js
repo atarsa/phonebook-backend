@@ -47,12 +47,12 @@ app.get('/api/persons', (req, res) => {
     }));  
 });
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then(person => {
       console.log(person);
       if (person){
-        res.json(person.toJSON)
+        res.json(person.toJSON())
       } else {
         res.status(204).end()
       }
@@ -83,32 +83,54 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
-  // const names = persons.map(person => person.name)
-  
-  // if (names.indexOf(body.name) !== -1){
-  //   return res.status(400).json({
-  //     error: 'Name must be unique'
-  //   })
-  // }
+  const name = body.name
+  const number = body.number  
 
-  const person = new Person({
-    name: body.name,
-    number: body.number
-  })
-
-  person.save().then(savedPerson => {
-    res.json(savedPerson.toJSON())
-  })
+  // check if person with the name already in db
+  Person.findOne({name: name})
+    .then(person => {
+      console.log(person);
+      if (person) {
+        res.status(400).send({"error": "Name already in database"})
+      } else {
+        const person = new Person({
+          name: name,
+          number: number
+        })
+        person.save().then(savedPerson => {
+          res.json(savedPerson.toJSON())
+        })
+      }
+    })  
 })
 
-app.get('/info', (req,res) => {
-  res.send(`
+app.put('/api/persons/:id', (req,res, next) => {
+  const body = req.body
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person.findByIdAndUpdate(req.params.id, person, {new: true})
+    .then(updatedPerson => {
+      res.json(updatedPerson.toJSON())
+    })
+    .catch(error => next(error))    
+})
+
+app.get('/info', (req,res, next) => {
+  Person.find({})
+    .then(result => {
+      res.send(`
     <div>
-      Phonebook has info for ${persons.length} people
+      Phonebook has info for ${result.length} people
       <br>
       ${new Date()}
     </div>
   `)
+    })
+
+  
 })
 
 
