@@ -71,36 +71,31 @@ app.delete('/api/persons/:id', (req,res, next) => {
 app.post('/api/persons', (req, res) => {
   const body = req.body
 
-  if (body.name === undefined){
-    return res.status(400).json({
-      error: 'Name missing'
+  // if (body.name === undefined){
+  //   return res.status(400).json({
+  //     error: 'Name missing'
+  //   })
+  // }
+
+  // if (body.number === undefined){
+  //   return res.status(400).json({
+  //     error: 'Number missing'
+  //   })
+  // }
+  
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
+  
+  person
+    .save()
+    .then(savedPerson => {
+    res.json(savedPerson.toJSON())
     })
-  }
-
-  if (body.number === undefined){
-    return res.status(400).json({
-      error: 'Number missing'
-    })
-  }
-
-  const name = body.name
-  const number = body.number  
-
-  // check if person with the name already in db
-  Person.findOne({name: name})
-    .then(person => {
-      console.log(person);
-      if (person) {
-        res.status(400).send({"error": "Name already in database"})
-      } else {
-        const person = new Person({
-          name: name,
-          number: number
-        })
-        person.save().then(savedPerson => {
-          res.json(savedPerson.toJSON())
-        })
-      }
+    .catch(error => {
+      console.log(error.message);
+      res.status(400).json({error: error.message})
     })  
 })
 
@@ -144,8 +139,8 @@ const errorHandler = ( error, req, res, next) => {
   console.log(error.message)
 
   if (error.name === 'CastError' && error.kind === 'ObjectId') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } 
+    return res.status(400).send({ error: 'malformatted id' })
+  }  else if (error.name === 'ValidationError') {       return res.status(400).json({ error: error.message })  }
 
   next(error)
 }
